@@ -54,4 +54,4 @@ Suggest the top 2 best-fit courses with short reasons.
     return jsonify({"response": response['results'][0]['generated_text']})
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run()
