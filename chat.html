@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🎓 CourseBot</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    #chatbox {
+      max-width: 600px;
+      margin: 50px auto;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+
+    #messages {
+      height: 400px;
+      overflow-y: auto;
+      padding-right: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .message {
+      display: flex;
+      margin: 10px 0;
+    }
+
+    .user .bubble {
+      margin-left: auto;
+      background-color: #007bff;
+      color: white;
+      border-radius: 12px 12px 0 12px;
+    }
+
+    .bot .bubble {
+      margin-right: auto;
+      background-color: #e5e5e5;
+      color: #333;
+      border-radius: 12px 12px 12px 0;
+    }
+
+    .bubble {
+      padding: 10px 15px;
+      max-width: 70%;
+      word-wrap: break-word;
+      line-height: 1.4;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      margin: 0 10px;
+    }
+
+    .user .avatar {
+      order: 2;
+    }
+
+    .bot .avatar {
+      order: 0;
+    }
+
+    #input-area {
+      display: flex;
+      margin-top: 15px;
+    }
+
+    #userInput {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    button {
+      padding: 0 20px;
+      font-size: 16px;
+      margin-left: 10px;
+      border-radius: 8px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .typing {
+      font-style: italic;
+      color: #888;
+      margin-left: 45px;
+    }
+  </style>
+</head>
+<body>
+  <div id="chatbox">
+    <h2>🎓 CourseBot (Powered by Watsonx)</h2>
+    <div id="messages"></div>
+    <div id="input-area">
+      <input type="text" id="userInput" placeholder="Ask something like 'I want to learn cloud computing'...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const messagesDiv = document.getElementById('messages');
+
+    function appendMessage(type, text) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${type}`;
+
+      const avatar = document.createElement('img');
+      avatar.className = 'avatar';
+      avatar.src = type === 'user' ? 'https://cdn-icons-png.flaticon.com/512/1077/1077012.png' : 'https://cdn-icons-png.flaticon.com/512/4712/4712105.png';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.innerText = text;
+
+      messageDiv.appendChild(type === 'user' ? bubble : avatar);
+      messageDiv.appendChild(type === 'user' ? avatar : bubble);
+      messagesDiv.appendChild(messageDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const userInput = document.getElementById('userInput');
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      appendMessage('user', text);
+      userInput.value = '';
+
+      // Typing indicator
+      const typing = document.createElement('div');
+      typing.className = 'typing';
+      typing.id = 'typing';
+      typing.innerText = 'CourseBot is typing...';
+      messagesDiv.appendChild(typing);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+      try {
+        const res = await fetch('http://127.0.0.1:5000/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_input: text })
+        });
+        const data = await res.json();
+
+        document.getElementById('typing').remove();
+        appendMessage('bot', data.response);
+      } catch (err) {
+        document.getElementById('typing').remove();
+        appendMessage('bot', "❌ Couldn't connect to the backend.");
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
