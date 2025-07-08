@@ -153,7 +153,7 @@
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
       try {
-        const res = await fetch('https://course-bot-ten.vercel.app/recommend', {
+        const res = await fetch('http://http://127.0.0.1:5000/recommend', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_input: text })
